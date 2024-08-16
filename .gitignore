@@ -1,0 +1,4 @@
+.env
+.zig-cache
+zig-out/
+*.db
