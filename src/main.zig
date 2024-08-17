@@ -28,6 +28,8 @@ pub fn main() !void {
     const body = try req.body.toOwnedSlice();
     defer req.allocator.free(body);
 
+    std.debug.print("Status: {s}\n", .{body}); // Debug
+
     if (res.status != .ok) {
         log.err("GET request failed - {s}\n", .{body});
         return;
