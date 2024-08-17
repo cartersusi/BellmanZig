@@ -1,4 +1,4 @@
-.env
+conf.conf
 .zig-cache
 zig-out/
 *.db
