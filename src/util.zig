@@ -3,7 +3,6 @@ const assert = std.debug.assert;
 
 const Config = struct {
     link: []const u8,
-    conversion: []const u8,
     targets: std.ArrayList([]const u8),
 };
 
@@ -39,13 +38,12 @@ pub fn readConfigFile(filename: []const u8) !Config {
     }
 
     const link = try std.fmt.allocPrint(allocator, "{s}{s}", .{ arr.items[0], arr.items[1] });
-    const target = try std.fmt.allocPrint(allocator, "{s}", .{ arr.items[2] });
 
     var targets = std.ArrayList([]const u8).init(allocator);
-    defer targets.deinit();
+    // DO NOT DEFER
 
     var len: i8 = 0;
-    var it = std.mem.split(u8, arr.items[3], ",");
+    var it = std.mem.split(u8, arr.items[2], ",");
         while (it.next()) |x| {
             try targets.append(x);
             len += 1;
@@ -53,5 +51,5 @@ pub fn readConfigFile(filename: []const u8) !Config {
 
     assert(len > 2);
 
-    return Config{ .link = link, .conversion = target, .targets = targets };
+    return Config{ .link = link, .targets = targets };
 }

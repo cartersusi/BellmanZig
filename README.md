@@ -2,7 +2,8 @@ Bellman Ford implementation in Zig
 ```
 ├── build.zig
 ├── build.zig.zon
-├── conf.conf
+├── conf.conf/example.conf
+├── py
 ├── README.md
 ├── requirements.txt
 ├── src/
@@ -13,7 +14,7 @@ Bellman Ford implementation in Zig
 ├── data/
 │   ├── data.db
 │   └── data.csv
-│   └── example.json 
+│   └── example.json
 ├── scripts/
 │   ├── gen.py
 │   └── init.py
