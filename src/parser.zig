@@ -43,6 +43,7 @@ pub fn get_timestamp(line: []const u8) u64 {
 pub fn get_rate(line: []const u8) RatesMap {
     const line_len = line.len;
 
+    // dont feel like to make a proper parser
     // change if API res changes format
     const name_start = 5;
     const name_end = 8;
@@ -78,8 +79,8 @@ pub fn parse_json(body: []const u8) !std.ArrayList(RatesMap) {
 
     var timestamp: u64 = 0;
 
-    var i: usize = 0;
-    var rate_count: usize = 0;
+    var i: i16 = 0;
+    var rate_count: i16 = 0;
 
     while (lines.next()) |line| {
         if (i > 170 and str_contains(line, '}')) {

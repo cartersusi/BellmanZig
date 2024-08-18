@@ -17,18 +17,18 @@ pub fn main() !void {
     var req = api.FetchReq.init(gpa);
     defer req.deinit();
 
-    const url_str = util.readConfigFile("conf.conf") catch {
+    const config = util.readConfigFile("conf.conf") catch {
         log.err("Failed to read config file.\n", .{});
         return;
     };
 
-    debug.print("URL: |{s}|\n", .{url_str}); // Debug
+    debug.print("URL: |{s}|\n", .{config.link}); // Debug
 
-    const res = try req.get(url_str, &.{});
+    const res = try req.get(config.link, &.{});
     const body = try req.body.toOwnedSlice();
     defer req.allocator.free(body);
 
-    std.debug.print("Status: {s}\n", .{body}); // Debug
+    // std.debug.print("Status: {s}\n", .{body}); // Debug
 
     if (res.status != .ok) {
         log.err("GET request failed - {s}\n", .{body});
@@ -40,7 +40,7 @@ pub fn main() !void {
     const rates = try parser.parse_json(body);
     defer rates.deinit();
 
-    for (rates.items) |rate| {
-        debug.print("Name: {s} Rate: {d}\n", .{ rate.name, rate.rate });
-    }
+    //for (rates.items) |rate| {
+    //    debug.print("Name: {s} Rate: {d}\n", .{ rate.name, rate.rate });
+    //} // Debug
 }
