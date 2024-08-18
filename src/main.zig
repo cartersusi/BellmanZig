@@ -6,6 +6,7 @@ const debug = std.debug;
 const api = @import("api.zig");
 const parser = @import("parser.zig");
 const util = @import("util.zig");
+const convert = @import("convert.zig");
 
 pub fn main() !void {
     var gpa_aloc = heap.GeneralPurposeAllocator(.{}){};
@@ -37,10 +38,26 @@ pub fn main() !void {
 
     //debug.print("Raw JSON: {s}\n", .{body}); // Debug
 
-    const rates = try parser.parse_json(body);
-    defer rates.deinit();
+    var rates_map = try parser.parse_json(gpa, body, config.targets);
+    defer rates_map.values.deinit();
 
-    //for (rates.items) |rate| {
-    //    debug.print("Name: {s} Rate: {d}\n", .{ rate.name, rate.rate });
-    //} // Debug
+    std.debug.print("N Rates: {d}\n", .{rates_map.length});
+    for (config.targets.items) |target| {
+        std.debug.print("{s}: {?}\n", .{ target, rates_map.values.get(target) });
+    }
+
+    const matrix = try convert.rates_matrix(gpa, rates_map, config.targets);
+    defer {
+        for (matrix) |*row| {
+            gpa.free(row.*);
+        }
+        gpa.free(matrix);
+    }
+
+    for (matrix) |*row| {
+        for (row.*) |val| {
+            std.debug.print("{d} ", .{val});
+        }
+        std.debug.print("\n", .{});
+    }
 }

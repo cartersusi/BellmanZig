@@ -1,9 +1,16 @@
 const std = @import("std");
 const assert = std.debug.assert;
+const heap = std.heap;
+const log = std.log;
 
-pub const RatesMap = struct {
+const RatesMap = struct {
     name: []const u8,
     rate: f64,
+};
+
+pub const Rates = struct {
+    length: usize,
+    values: std.StringHashMap(f64),
 };
 
 pub fn stringToF64(input: []const u8) !f64 {
@@ -70,18 +77,15 @@ pub fn get_rate(line: []const u8) RatesMap {
 }
 
 // PARSE TIME =  74459ns | 72µs | kinda spaghetti but good enough for now
-pub fn parse_json(body: []const u8) !std.ArrayList(RatesMap) {
+pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: std.ArrayList([]const u8)) !Rates {
+    var h = std.StringHashMap(f64).init(gpa);
+    // ret value - DO NOT DEFER
+
     var lines = std.mem.split(u8, body, "\n");
 
-    const aloc = std.heap.page_allocator;
-    var rmap = std.ArrayList(RatesMap).init(aloc);
-    // DO NOT DEFER RMAP
-
     var timestamp: u64 = 0;
-
-    var i: i16 = 0;
-    var rate_count: i16 = 0;
-
+    var i: usize = 0;
+    var rate_count: usize = 0;
     while (lines.next()) |line| {
         if (i > 170 and str_contains(line, '}')) {
             break;
@@ -92,15 +96,19 @@ pub fn parse_json(body: []const u8) !std.ArrayList(RatesMap) {
         }
         if (i > 5) {
             const rate = get_rate(line);
-            try rmap.append(rate);
-            rate_count += 1;
+            for (targets.items) |target| {
+                if (std.mem.eql(u8, rate.name, target)) {
+                    try h.put(rate.name, rate.rate);
+                    rate_count += 1;
+                }
+            }
         }
         i += 1;
     }
 
-    assert(rate_count == 169);
+    assert(rate_count > 0);
     std.debug.print("Timestamp: {d}\n", .{timestamp});
     std.debug.print("Num Rates: {d}\n", .{rate_count});
 
-    return rmap;
+    return Rates{ .length = rate_count, .values = h };
 }
