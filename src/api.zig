@@ -5,8 +5,7 @@ const Client = std.http.Client;
 const Headers = std.http.Headers;
 const RequestOptions = std.http.Client.RequestOptions;
 
-// https://github.com/BrookJeynes/zig-fetch
-// API TIME: 132360724ns | 131082µs
+// ty @ https://github.com/BrookJeynes/zig-fetch
 pub const FetchReq = struct {
     const Self = @This();
     const Allocator = std.mem.Allocator;

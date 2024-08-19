@@ -3,3 +3,4 @@ conf.conf
 zig-out/
 *.db
 venv
+notes.md

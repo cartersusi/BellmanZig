@@ -6,6 +6,36 @@ const Config = struct {
     targets: std.ArrayList([]const u8),
 };
 
+pub fn stringToF64(input: []const u8) !f64 {
+    return std.fmt.parseFloat(f64, input);
+}
+
+pub fn str_contains(str: []const u8, ch: u8) bool {
+    for (str) |c| {
+        if (c == ch) {
+            return true;
+        }
+    }
+    return false;
+}
+
+pub fn is_it_in(n: usize, arr: []usize) bool {
+    for (arr) |x| {
+        if (x == n) {
+            return true;
+        }
+    }
+    return false;
+}
+
+pub fn arr_len(arr: std.ArrayList(usize)) usize {
+    var ret: usize = 0;
+    for (arr.items) |_| {
+        ret += 1;
+    }
+    return ret;
+}
+
 fn get_conf_var(line: []const u8) []const u8 {
     var i: usize = 0;
     while (line[i] != '=') {
@@ -33,7 +63,6 @@ pub fn readConfigFile(filename: []const u8) !Config {
         const memval = try allocator.alloc(u8, val.len);
         std.mem.copyForwards(u8, memval, val);
 
-        //std.debug.print("Line: |{s}|\n", .{memval}); // Debug
         try arr.append(memval);
     }
 
@@ -44,12 +73,15 @@ pub fn readConfigFile(filename: []const u8) !Config {
 
     var len: i8 = 0;
     var it = std.mem.split(u8, arr.items[2], ",");
-        while (it.next()) |x| {
-            try targets.append(x);
-            len += 1;
-        }
+    while (it.next()) |x| {
+        try targets.append(x);
+        len += 1;
+    }
 
     assert(len > 2);
 
     return Config{ .link = link, .targets = targets };
 }
+
+// readConfigFile() // Debug
+//std.debug.print("Line: |{s}|\n", .{memval}); // Debug

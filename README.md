@@ -23,3 +23,34 @@ Bellman Ford implementation in Zig
     └── test_parser.zig
     └── test_api.zig
 ```
+
+```sh
+-----@linux ~/BellmanZig (main)> ./zig-out/bin/BellmanZig
+Timestamp: 1724032902
+Num Rates: 6
+Arbitrage opportunity:
+RUB --->USD --->INR --->MXN --->RUB
+Arbitrage opportunity:
+RUB --->USD --->INR --->MXN --->RUB
+Arbitrage opportunity:
+RUB --->USD --->INR --->MXN --->RUB
+Arbitrage opportunity:
+INR --->RUB --->INR
+Arbitrage opportunity:
+INR --->RUB --->INR
+Arbitrage opportunity:
+RUB --->INR --->MXN --->RUB
+Arbitrage opportunity:
+INR --->RUB --->INR
+Arbitrage opportunity:
+INR --->RUB --->INR
+Arbitrage opportunity:
+RUB --->INR --->MXN --->RUB
+Arbitrage opportunity:
+INR --->RUB --->INR
+Arbitrage opportunity:
+INR --->RUB --->INR
+Arbitrage opportunity:
+RUB --->INR --->MXN --->RUB
+-----@linux ~/BellmanZig (main)> 
+```
