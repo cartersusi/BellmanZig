@@ -1,7 +1,7 @@
 const std = @import("std");
 const heap = std.heap;
 const log = std.log;
-const debug = std.debug
+const debug = std.debug;
 
 const dprint = std.debug.print;
 
