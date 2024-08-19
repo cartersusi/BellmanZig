@@ -53,4 +53,4 @@ pub fn main() !void {
 //m1
 //API TIME =  123ms
 //PARSE TIME =  442µs
-//ALG TIME =  783µs
+//ALG TIME dim(6)=  783µs
