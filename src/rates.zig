@@ -33,7 +33,6 @@ pub const Rates = struct {
     }
 };
 
-// PARSE TIME =  74459ns | 72µs | kinda spaghetti but good enough for now
 pub fn parse_json(gpa: mem.Allocator, body: []const u8, targets: [][]const u8) !Rates {
     // ret value - DO NOT DEFER
     // had issues extracting to a function
