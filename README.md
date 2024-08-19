@@ -8,8 +8,6 @@ Num Rates: 6
 Arbitrage opportunity:
 USD --->EUR --->USD
 Arbitrage opportunity:
-EUR --->INR --->PLN --->RUB --->USD --->MXN --->EUR
-Arbitrage opportunity:
 EUR --->INR --->PLN --->EUR
 Arbitrage opportunity:
 MXN --->EUR --->USD --->MXN
