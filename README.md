@@ -1,56 +1,31 @@
 Bellman Ford implementation in Zig
-```
-├── build.zig
-├── build.zig.zon
-├── conf.conf/example.conf
-├── py
-├── README.md
-├── requirements.txt
-├── src/
-│   ├── main.zig
-│   ├── parser.zig
-│   └── utils.zig
-|   └── api.zig
-├── data/
-│   ├── data.db
-│   └── data.csv
-│   └── example.json
-├── scripts/
-│   ├── gen.py
-│   └── init.py
-└── tests/
-    ├── test_main.zig
-    └── test_parser.zig
-    └── test_api.zig
-```
 
 ```sh
------@linux ~/BellmanZig (main)> ./zig-out/bin/BellmanZig
-Timestamp: 1724032902
+---@mac ~/BellmanZig (main)> ./zig-out/bin/BellmanZig
+Targets: { EUR, INR, MXN, PLN, RUB, USD }
+Timestamp: 1724036401
 Num Rates: 6
 Arbitrage opportunity:
-RUB --->USD --->INR --->MXN --->RUB
+USD --->EUR --->USD
 Arbitrage opportunity:
-RUB --->USD --->INR --->MXN --->RUB
+EUR --->INR --->PLN --->RUB --->USD --->MXN --->EUR
 Arbitrage opportunity:
-RUB --->USD --->INR --->MXN --->RUB
+EUR --->INR --->PLN --->EUR
 Arbitrage opportunity:
-INR --->RUB --->INR
+MXN --->EUR --->USD --->MXN
 Arbitrage opportunity:
-INR --->RUB --->INR
+INR --->EUR --->INR
 Arbitrage opportunity:
-RUB --->INR --->MXN --->RUB
+RUB --->INR --->RUB
 Arbitrage opportunity:
-INR --->RUB --->INR
+INR --->PLN --->RUB --->INR
 Arbitrage opportunity:
-INR --->RUB --->INR
+MXN --->EUR --->USD --->MXN
 Arbitrage opportunity:
-RUB --->INR --->MXN --->RUB
+INR --->EUR --->INR
 Arbitrage opportunity:
-INR --->RUB --->INR
+RUB --->INR --->RUB
 Arbitrage opportunity:
-INR --->RUB --->INR
-Arbitrage opportunity:
-RUB --->INR --->MXN --->RUB
------@linux ~/BellmanZig (main)> 
+INR --->PLN --->RUB --->INR
+---@mac ~/BellmanZig (main)> 
 ```

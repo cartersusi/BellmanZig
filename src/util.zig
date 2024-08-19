@@ -6,8 +6,8 @@ const Config = struct {
     targets: std.ArrayList([]const u8),
 };
 
-pub fn stringToF64(input: []const u8) !f64 {
-    return std.fmt.parseFloat(f64, input);
+pub fn compareStrings(_: void, lhs: []const u8, rhs: []const u8) bool {
+    return std.mem.order(u8, lhs, rhs).compare(std.math.CompareOperator.lt);
 }
 
 pub fn str_contains(str: []const u8, ch: u8) bool {
@@ -26,14 +26,6 @@ pub fn is_it_in(n: usize, arr: []usize) bool {
         }
     }
     return false;
-}
-
-pub fn arr_len(arr: std.ArrayList(usize)) usize {
-    var ret: usize = 0;
-    for (arr.items) |_| {
-        ret += 1;
-    }
-    return ret;
 }
 
 fn get_conf_var(line: []const u8) []const u8 {

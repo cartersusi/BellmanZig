@@ -87,13 +87,19 @@ pub fn arbitrage(gpa: std.mem.Allocator, currency_rates: rates.Rates) !void {
 
                     if (print_cycle.items[0] == print_cycle.items[print_cycle.items.len - 1]) {
                         std.debug.print("Arbitrage opportunity:\n", .{});
-                        const num = util.arr_len(print_cycle);
+
+                        const num = print_cycle.items.len;
+                        if (num >= currency_rates.currencies.len) { // add conf value later
+                            std.debug.print("Cycle too long...\n", .{});
+                            continue;
+                        }
+
                         for (0..num) |x| {
                             if (x == num - 1) {
-                                std.debug.print("{s}\n", .{currency_rates.currencies.items[print_cycle.items[x]]});
+                                std.debug.print("{s}\n", .{currency_rates.currencies[print_cycle.items[x]]});
                                 continue;
                             }
-                            std.debug.print("{s} --->", .{currency_rates.currencies.items[print_cycle.items[x]]});
+                            std.debug.print("{s} --->", .{currency_rates.currencies[print_cycle.items[x]]});
                         }
                     }
                 }

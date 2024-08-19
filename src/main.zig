@@ -23,6 +23,10 @@ pub fn main() !void {
         log.err("Failed to read config file.\n", .{});
         return;
     };
+    // slice config.targets
+    const targets = config.targets.items;
+    std.sort.insertion([]const u8, targets, {}, util.compareStrings);
+    std.debug.print("Targets: {s}\n", .{targets});
 
     const res = try req.get(config.link, &.{});
     const body = try req.body.toOwnedSlice();
@@ -33,7 +37,7 @@ pub fn main() !void {
         return;
     }
 
-    var currency_rates = try rates.parse_json(gpa, body, config.targets);
+    var currency_rates = try rates.parse_json(gpa, body, targets);
     defer currency_rates.free(gpa);
 
     try bellmain.arbitrage(gpa, currency_rates);
@@ -41,9 +45,11 @@ pub fn main() !void {
 
 // debug.print("URL: |{s}|\n", .{config.link}); // Debug
 // std.debug.print("Status: {s}\n", .{body}); // Debug
+//std.debug.print("Targets: {s}\n", .{targets}); // Debug
 //debug.print("Raw JSON: {s}\n", .{body}); // Debug
 //currency_rates.print(); // Debug
 
+//m1
 //API TIME =  123ms
-//PARSE TIME =  176108ns
-//ALG TIME =  275088ns
+//PARSE TIME =  442µs
+//ALG TIME =  783µs

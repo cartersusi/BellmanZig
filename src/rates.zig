@@ -12,8 +12,7 @@ const RatesMap = struct {
 
 pub const Rates = struct {
     dim: usize,
-    currencies: std.ArrayList([]const u8),
-    map: std.StringHashMap(f64),
+    currencies: [][]const u8,
     graph: [][]const f64,
 
     pub fn free(self: *Rates, allocator: std.mem.Allocator) void {
@@ -21,17 +20,11 @@ pub const Rates = struct {
             allocator.free(row);
         }
         allocator.free(self.graph);
-
-        self.map.deinit();
-        self.currencies.deinit();
     }
 
     pub fn print(self: *const Rates) void {
         std.debug.print("Dim: {d}\n", .{self.dim});
         std.debug.print("Currencies: {s}\n", .{self.currencies.items});
-        for (0..self.dim) |i| {
-            std.debug.print("{s}: {?}\n", .{ self.currencies.items[i], self.map.get(self.currencies.items[i]).? });
-        }
         for (self.graph) |row| {
             std.debug.print("{any}\n", .{row});
         }
@@ -39,9 +32,14 @@ pub const Rates = struct {
 };
 
 // PARSE TIME =  74459ns | 72µs | kinda spaghetti but good enough for now
-pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: std.ArrayList([]const u8)) !Rates {
-    var h = std.StringHashMap(f64).init(gpa);
+pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: [][]const u8) !Rates {
     // ret value - DO NOT DEFER
+    // had issues extracting to a function
+    // error: access of union field 'Pointer' while field 'Struct' is active
+    var graph = try gpa.alloc([]f64, targets.len);
+    for (graph) |*row| {
+        row.* = try gpa.alloc(f64, targets.len);
+    }
 
     var lines = std.mem.split(u8, body, "\n");
 
@@ -49,6 +47,9 @@ pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: std.ArrayLi
     var i: usize = 0;
     var rate_count: usize = 0;
     while (lines.next()) |line| {
+        if (rate_count == targets.len) {
+            break;
+        }
         if (i > 170 and util.str_contains(line, '}')) {
             break;
         }
@@ -57,12 +58,11 @@ pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: std.ArrayLi
             assert(timestamp > 0);
         }
         if (i > 5) {
-            const rate = get_rate(line);
-            for (targets.items) |target| {
-                if (std.mem.eql(u8, rate.name, target)) {
-                    try h.put(rate.name, rate.rate);
-                    rate_count += 1;
-                }
+            // 3 char currency code 5..8
+            if (std.mem.eql(u8, line[5..8], targets[rate_count])) {
+                const rate = try get_rate(line);
+                graph[0][rate_count] = rate;
+                rate_count += 1;
             }
         }
         i += 1;
@@ -72,25 +72,18 @@ pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: std.ArrayLi
     std.debug.print("Timestamp: {?}\n", .{timestamp});
     std.debug.print("Num Rates: {?}\n", .{rate_count});
 
-    // had issues extracting to a function
-    // error: access of union field 'Pointer' while field 'Struct' is active
-    // ret value - DO NOT DEFER
-    var graph = try gpa.alloc([]f64, rate_count);
-    for (graph) |*row| {
-        row.* = try gpa.alloc(f64, rate_count);
-    }
-
     for (0..rate_count) |j| {
-        const base = h.get(targets.items[j]).?;
+        const base = graph[0][j];
         for (0..rate_count) |k| {
-            graph[j][k] = h.get(targets.items[k]).? / base;
+            graph[j][k] = graph[0][k] / base;
         }
     }
 
-    return Rates{ .dim = rate_count, .currencies = targets, .map = h, .graph = graph };
+    return Rates{ .dim = rate_count, .currencies = targets, .graph = graph };
 }
 
 fn get_timestamp(line: []const u8) u64 {
+    //what happened to @XtoY(y,x) ?
     var timestamp: u64 = 0;
     var found = false;
 
@@ -111,18 +104,14 @@ fn get_timestamp(line: []const u8) u64 {
     return 0;
 }
 
-fn get_rate(line: []const u8) RatesMap {
+fn get_rate(line: []const u8) !f64 {
     const line_len = line.len;
 
     // dont feel like making a proper parser
     // change if API res changes format
-    const name_start = 5;
-    const name_end = 8;
 
     const rate_start = 11;
     const rate_end = line_len;
-
-    const name: []const u8 = line[name_start..name_end];
 
     var rate_str: []const u8 = undefined;
 
@@ -132,10 +121,10 @@ fn get_rate(line: []const u8) RatesMap {
         rate_str = line[rate_start..rate_end];
     }
 
-    const rate: f64 = util.stringToF64(rate_str) catch {
-        std.log.err("Failed to parse rate. {s}\n", .{rate_str});
-        return RatesMap{ .name = name, .rate = 0.0 };
+    const rate = std.fmt.parseFloat(f64, rate_str) catch {
+        std.log.err("Failed to parse rate.\n", .{});
+        return 0.0;
     };
 
-    return RatesMap{ .name = name, .rate = rate };
+    return rate;
 }
