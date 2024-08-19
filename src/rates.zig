@@ -1,7 +1,9 @@
 const std = @import("std");
-const assert = std.debug.assert;
-const heap = std.heap;
+const mem = std.mem;
 const log = std.log;
+
+const dprint = std.debug.print;
+const assert = std.debug.assert;
 
 const util = @import("util.zig");
 
@@ -15,7 +17,7 @@ pub const Rates = struct {
     currencies: [][]const u8,
     graph: [][]const f64,
 
-    pub fn free(self: *Rates, allocator: std.mem.Allocator) void {
+    pub fn free(self: *Rates, allocator: mem.Allocator) void {
         for (self.graph) |row| {
             allocator.free(row);
         }
@@ -23,16 +25,16 @@ pub const Rates = struct {
     }
 
     pub fn print(self: *const Rates) void {
-        std.debug.print("Dim: {d}\n", .{self.dim});
-        std.debug.print("Currencies: {s}\n", .{self.currencies.items});
+        dprint("Dim: {d}\n", .{self.dim});
+        dprint("Currencies: {s}\n", .{self.currencies.items});
         for (self.graph) |row| {
-            std.debug.print("{any}\n", .{row});
+            dprint("{any}\n", .{row});
         }
     }
 };
 
 // PARSE TIME =  74459ns | 72µs | kinda spaghetti but good enough for now
-pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: [][]const u8) !Rates {
+pub fn parse_json(gpa: mem.Allocator, body: []const u8, targets: [][]const u8) !Rates {
     // ret value - DO NOT DEFER
     // had issues extracting to a function
     // error: access of union field 'Pointer' while field 'Struct' is active
@@ -41,7 +43,7 @@ pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: [][]const u
         row.* = try gpa.alloc(f64, targets.len);
     }
 
-    var lines = std.mem.split(u8, body, "\n");
+    var lines = mem.split(u8, body, "\n");
 
     var timestamp: u64 = 0;
     var i: usize = 0;
@@ -59,7 +61,7 @@ pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: [][]const u
         }
         if (i > 5) {
             // 3 char currency code 5..8
-            if (std.mem.eql(u8, line[5..8], targets[rate_count])) {
+            if (mem.eql(u8, line[5..8], targets[rate_count])) {
                 const rate = try get_rate(line);
                 graph[0][rate_count] = rate;
                 rate_count += 1;
@@ -69,8 +71,8 @@ pub fn parse_json(gpa: std.mem.Allocator, body: []const u8, targets: [][]const u
     }
 
     assert(rate_count > 0);
-    std.debug.print("Timestamp: {?}\n", .{timestamp});
-    std.debug.print("Num Rates: {?}\n", .{rate_count});
+    dprint("Timestamp: {?}\n", .{timestamp});
+    dprint("Num Rates: {?}\n", .{rate_count});
 
     for (0..rate_count) |j| {
         const base = graph[0][j];
@@ -100,7 +102,7 @@ fn get_timestamp(line: []const u8) u64 {
         return timestamp;
     }
 
-    std.log.err("Timestamp not found.\n", .{});
+    log.err("Timestamp not found.\n", .{});
     return 0;
 }
 
@@ -122,7 +124,7 @@ fn get_rate(line: []const u8) !f64 {
     }
 
     const rate = std.fmt.parseFloat(f64, rate_str) catch {
-        std.log.err("Failed to parse rate.\n", .{});
+        log.err("Failed to parse rate.\n", .{});
         return 0.0;
     };
 

@@ -1,4 +1,5 @@
 const std = @import("std");
+const mem = std.mem;
 const assert = std.debug.assert;
 
 const Config = struct {
@@ -7,7 +8,7 @@ const Config = struct {
 };
 
 pub fn compareStrings(_: void, lhs: []const u8, rhs: []const u8) bool {
-    return std.mem.order(u8, lhs, rhs).compare(std.math.CompareOperator.lt);
+    return mem.order(u8, lhs, rhs).compare(std.math.CompareOperator.lt);
 }
 
 pub fn str_contains(str: []const u8, ch: u8) bool {
@@ -53,9 +54,14 @@ pub fn readConfigFile(filename: []const u8) !Config {
         const val = get_conf_var(line);
 
         const memval = try allocator.alloc(u8, val.len);
-        std.mem.copyForwards(u8, memval, val);
+        mem.copyForwards(u8, memval, val);
 
         try arr.append(memval);
+    }
+
+    assert(arr.items.len == 3);
+    for (0..3) |i| {
+        assert(arr.items[i].len > 0);
     }
 
     const link = try std.fmt.allocPrint(allocator, "{s}{s}", .{ arr.items[0], arr.items[1] });
@@ -63,14 +69,13 @@ pub fn readConfigFile(filename: []const u8) !Config {
     var targets = std.ArrayList([]const u8).init(allocator);
     // DO NOT DEFER
 
-    var len: i8 = 0;
-    var it = std.mem.split(u8, arr.items[2], ",");
+    var it = mem.split(u8, arr.items[2], ",");
     while (it.next()) |x| {
         try targets.append(x);
-        len += 1;
     }
 
-    assert(len > 2);
+    // things get weird if not met
+    assert(targets.items.len > 2);
 
     return Config{ .link = link, .targets = targets };
 }

@@ -1,9 +1,15 @@
 const std = @import("std");
+const mem = std.mem;
+const math = std.math;
+
+const assert = std.debug.assert;
+const dprint = std.debug.print;
+
 const rates = @import("rates.zig");
 const util = @import("util.zig");
-const time = std.time;
 
-fn negateLogarithmConvertor(gpa: std.mem.Allocator, graph: [][]const f64, dim: usize) ![][]const f64 {
+fn negateLogarithmConvertor(gpa: mem.Allocator, graph: [][]const f64, dim: usize) ![][]const f64 {
+    // DO NOT DEFER
     var ret = try gpa.alloc([]f64, dim);
     for (ret) |*row| {
         row.* = try gpa.alloc(f64, dim);
@@ -12,20 +18,22 @@ fn negateLogarithmConvertor(gpa: std.mem.Allocator, graph: [][]const f64, dim: u
     for (0..dim) |i| {
         for (0..dim) |j| {
             if (graph[i][j] == 0e0) {
-                ret[i][j] = std.math.inf(f64);
+                ret[i][j] = math.inf(f64);
             } else {
-                ret[i][j] = std.math.log(f64, std.math.e, graph[i][j]);
+                ret[i][j] = math.log(f64, math.e, graph[i][j]);
             }
         }
     }
 
+    assert(ret.len == dim);
+    assert(ret[0].len == dim);
     return ret;
 }
 
-pub fn arbitrage(gpa: std.mem.Allocator, currency_rates: rates.Rates) !void {
+pub fn arbitrage(gpa: mem.Allocator, currency_rates: rates.Rates) !void {
     const dim = currency_rates.dim;
     const graph = currency_rates.graph;
-    const inf = std.math.inf(f64);
+    const inf = math.inf(f64);
 
     const trans_graph = try negateLogarithmConvertor(gpa, graph, dim);
     var min_dist = try gpa.alloc(f64, dim);
@@ -86,20 +94,21 @@ pub fn arbitrage(gpa: std.mem.Allocator, currency_rates: rates.Rates) !void {
                     try print_cycle.append(pre[source_curr]);
 
                     if (print_cycle.items[0] == print_cycle.items[print_cycle.items.len - 1]) {
-                        std.debug.print("Arbitrage opportunity:\n", .{});
+                        assert(print_cycle.items.len > 2);
+                        dprint("Arbitrage opportunity:\n", .{});
 
                         const num = print_cycle.items.len;
                         if (num >= currency_rates.currencies.len) { // add conf value later
-                            std.debug.print("Cycle too long...\n", .{});
+                            dprint("Cycle too long...\n", .{});
                             continue;
                         }
 
                         for (0..num) |x| {
                             if (x == num - 1) {
-                                std.debug.print("{s}\n", .{currency_rates.currencies[print_cycle.items[x]]});
+                                dprint("{s}\n", .{currency_rates.currencies[print_cycle.items[x]]});
                                 continue;
                             }
-                            std.debug.print("{s} --->", .{currency_rates.currencies[print_cycle.items[x]]});
+                            dprint("{s} --->", .{currency_rates.currencies[print_cycle.items[x]]});
                         }
                     }
                 }

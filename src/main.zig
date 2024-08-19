@@ -2,7 +2,8 @@ const std = @import("std");
 const heap = std.heap;
 const log = std.log;
 const debug = std.debug;
-const time = std.time;
+
+const dprint = std.debug.print;
 
 const api = @import("api.zig");
 const rates = @import("rates.zig");
@@ -26,7 +27,7 @@ pub fn main() !void {
     // slice config.targets
     const targets = config.targets.items;
     std.sort.insertion([]const u8, targets, {}, util.compareStrings);
-    std.debug.print("Targets: {s}\n", .{targets});
+    dprint("Targets: {s}\n", .{targets});
 
     const res = try req.get(config.link, &.{});
     const body = try req.body.toOwnedSlice();
