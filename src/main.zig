@@ -1,7 +1,7 @@
 const std = @import("std");
 const heap = std.heap;
 const log = std.log;
-const debug = std.debug;
+const debug = std.debug
 
 const dprint = std.debug.print;
 
@@ -39,18 +39,12 @@ pub fn main() !void {
     }
 
     var currency_rates = try rates.parse_json(gpa, body, targets);
+
     defer currency_rates.free(gpa);
 
     try bellmain.arbitrage(gpa, currency_rates);
 }
 
-// debug.print("URL: |{s}|\n", .{config.link}); // Debug
-// std.debug.print("Status: {s}\n", .{body}); // Debug
-//std.debug.print("Targets: {s}\n", .{targets}); // Debug
-//debug.print("Raw JSON: {s}\n", .{body}); // Debug
-//currency_rates.print(); // Debug
-
-//m1
 //API TIME =  123ms
-//PARSE TIME =  442µs
-//ALG TIME dim(6)=  783µs
+//PARSE TIME =  58µs
+//ALG TIME dim(6)=  117µs

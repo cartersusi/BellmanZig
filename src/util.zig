@@ -44,7 +44,7 @@ pub fn readConfigFile(filename: []const u8) !Config {
 
     var buf_reader = std.io.bufferedReader(file.reader());
     var in_stream = buf_reader.reader();
-    var buf: [256]u8 = undefined;
+    var buf: [1024]u8 = undefined;
 
     const allocator = std.heap.page_allocator;
     var arr = std.ArrayList([]const u8).init(allocator);

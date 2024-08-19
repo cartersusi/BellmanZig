@@ -34,13 +34,11 @@ pub const Rates = struct {
 };
 
 pub fn parse_json(gpa: mem.Allocator, body: []const u8, targets: [][]const u8) !Rates {
-    // ret value - DO NOT DEFER
-    // had issues extracting to a function
-    // error: access of union field 'Pointer' while field 'Struct' is active
     var graph = try gpa.alloc([]f64, targets.len);
     for (graph) |*row| {
         row.* = try gpa.alloc(f64, targets.len);
     }
+    // ret value - DO NOT DEFER
 
     var lines = mem.split(u8, body, "\n");
 
@@ -59,7 +57,7 @@ pub fn parse_json(gpa: mem.Allocator, body: []const u8, targets: [][]const u8) !
             assert(timestamp > 0);
         }
         if (i > 5) {
-            // 3 char currency code 5..8
+            // 3 char currency code 5..8, dependent on target being sorted
             if (mem.eql(u8, line[5..8], targets[rate_count])) {
                 const rate = try get_rate(line);
                 graph[0][rate_count] = rate;
@@ -83,8 +81,7 @@ pub fn parse_json(gpa: mem.Allocator, body: []const u8, targets: [][]const u8) !
     return Rates{ .dim = rate_count, .currencies = targets, .graph = graph };
 }
 
-fn get_timestamp(line: []const u8) u64 {
-    //what happened to @XtoY(y,x) ?
+fn get_timestamp(line: []const u8) u64 { //what happened to @XtoY(y,x) ?
     var timestamp: u64 = 0;
     var found = false;
 
