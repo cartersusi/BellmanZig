@@ -9,7 +9,6 @@ const rates = @import("rates.zig");
 const util = @import("util.zig");
 
 fn negateLogarithmConvertor(gpa: mem.Allocator, graph: [][]const f64, dim: usize) ![][]const f64 {
-    // DO NOT DEFER
     var ret = try gpa.alloc([]f64, dim);
     for (ret) |*row| {
         row.* = try gpa.alloc(f64, dim);
@@ -38,7 +37,6 @@ pub fn arbitrage(gpa: mem.Allocator, currency_rates: rates.Rates) !void {
     const trans_graph = try negateLogarithmConvertor(gpa, graph, dim);
     var min_dist = try gpa.alloc(f64, dim);
     var pre = try gpa.alloc(usize, dim);
-
     defer {
         for (trans_graph) |row| {
             gpa.free(row);
@@ -98,7 +96,7 @@ pub fn arbitrage(gpa: mem.Allocator, currency_rates: rates.Rates) !void {
                         dprint("Arbitrage opportunity:\n", .{});
 
                         const num = print_cycle.items.len;
-                        if (num >= currency_rates.currencies.len) { // add conf value later
+                        if (num >= currency_rates.currencies.len) { //(arbitrary value) maybe add conf value
                             dprint("Cycle too long...\n", .{});
                             continue;
                         }
@@ -116,11 +114,3 @@ pub fn arbitrage(gpa: mem.Allocator, currency_rates: rates.Rates) !void {
         }
     }
 }
-
-// negateLogarithmConvertor // Debug
-//for (0..dim) |i| {  // Debug
-//    std.debug.print("\n", .{});
-//    for (0..dim) |j| {
-//        std.debug.print("{} ", .{ret[i][j]});
-//    }
-//}

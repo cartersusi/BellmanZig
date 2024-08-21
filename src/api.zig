@@ -1,17 +1,17 @@
 const std = @import("std");
 const http = std.http;
+const mem = std.mem;
 
-const Client = std.http.Client;
-const Headers = std.http.Headers;
-const RequestOptions = std.http.Client.RequestOptions;
+const Client = http.Client;
+const Headers = http.Headers;
+const RequestOptions = http.Client.RequestOptions;
 
-// ty @ https://github.com/BrookJeynes/zig-fetch
 pub const FetchReq = struct {
     const Self = @This();
-    const Allocator = std.mem.Allocator;
+    const Allocator = mem.Allocator;
 
     allocator: Allocator,
-    client: std.http.Client,
+    client: http.Client,
     body: std.ArrayList(u8),
 
     pub fn init(allocator: Allocator) Self {
@@ -28,7 +28,6 @@ pub const FetchReq = struct {
         self.body.deinit();
     }
 
-    /// Blocking
     pub fn get(self: *Self, url: []const u8, headers: []http.Header) !Client.FetchResult {
         const fetch_options = Client.FetchOptions{
             .location = Client.FetchOptions.Location{

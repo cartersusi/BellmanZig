@@ -37,14 +37,13 @@ fn get_conf_var(line: []const u8) []const u8 {
     return line[i + 1 ..];
 }
 
-// ignore errors idc
 pub fn readConfigFile(filename: []const u8) !Config {
     var file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();
 
     var buf_reader = std.io.bufferedReader(file.reader());
     var in_stream = buf_reader.reader();
-    var buf: [1024]u8 = undefined;
+    var buf: [256]u8 = undefined;
 
     const allocator = std.heap.page_allocator;
     var arr = std.ArrayList([]const u8).init(allocator);
@@ -67,7 +66,6 @@ pub fn readConfigFile(filename: []const u8) !Config {
     const link = try std.fmt.allocPrint(allocator, "{s}{s}", .{ arr.items[0], arr.items[1] });
 
     var targets = std.ArrayList([]const u8).init(allocator);
-    // DO NOT DEFER
 
     var it = mem.split(u8, arr.items[2], ",");
     while (it.next()) |x| {
@@ -79,6 +77,3 @@ pub fn readConfigFile(filename: []const u8) !Config {
 
     return Config{ .link = link, .targets = targets };
 }
-
-// readConfigFile() // Debug
-//std.debug.print("Line: |{s}|\n", .{memval}); // Debug

@@ -7,11 +7,6 @@ const assert = std.debug.assert;
 
 const util = @import("util.zig");
 
-const RatesMap = struct {
-    name: []const u8,
-    rate: f64,
-};
-
 pub const Rates = struct {
     dim: usize,
     currencies: [][]const u8,
@@ -38,7 +33,6 @@ pub fn parse_json(gpa: mem.Allocator, body: []const u8, targets: [][]const u8) !
     for (graph) |*row| {
         row.* = try gpa.alloc(f64, targets.len);
     }
-    // ret value - DO NOT DEFER
 
     var lines = mem.split(u8, body, "\n");
 
@@ -68,8 +62,8 @@ pub fn parse_json(gpa: mem.Allocator, body: []const u8, targets: [][]const u8) !
     }
 
     assert(rate_count > 0);
-    dprint("Timestamp: {?}\n", .{timestamp});
-    dprint("Num Rates: {?}\n", .{rate_count});
+    dprint("Timestamp: {d}\n", .{timestamp});
+    dprint("Num Rates: {any}\n", .{rate_count});
 
     for (0..rate_count) |j| {
         const base = graph[0][j];
@@ -105,18 +99,13 @@ fn get_timestamp(line: []const u8) u64 { //what happened to @XtoY(y,x) ?
 fn get_rate(line: []const u8) !f64 {
     const line_len = line.len;
 
-    // dont feel like making a proper parser
-    // change if API res changes format
-
-    const rate_start = 11;
-    const rate_end = line_len;
-
     var rate_str: []const u8 = undefined;
 
-    if (line[rate_end - 1] == ',') {
-        rate_str = line[rate_start .. rate_end - 1];
+    // floats start at 11
+    if (line[line_len - 1] == ',') {
+        rate_str = line[11 .. line_len - 1];
     } else {
-        rate_str = line[rate_start..rate_end];
+        rate_str = line[11..line_len];
     }
 
     const rate = std.fmt.parseFloat(f64, rate_str) catch {

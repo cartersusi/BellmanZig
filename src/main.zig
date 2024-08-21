@@ -1,7 +1,6 @@
 const std = @import("std");
 const heap = std.heap;
 const log = std.log;
-const debug = std.debug;
 
 const dprint = std.debug.print;
 
@@ -24,7 +23,8 @@ pub fn main() !void {
         log.err("Failed to read config file.\n", .{});
         return;
     };
-    // slice config.targets
+
+    // targets have to be a-z to match api res
     const targets = config.targets.items;
     std.sort.insertion([]const u8, targets, {}, util.compareStrings);
     dprint("Targets: {s}\n", .{targets});
@@ -44,7 +44,3 @@ pub fn main() !void {
 
     try bellmain.arbitrage(gpa, currency_rates);
 }
-
-//API TIME =  123ms
-//PARSE TIME =  58µs
-//ALG TIME dim(6)=  117µs
